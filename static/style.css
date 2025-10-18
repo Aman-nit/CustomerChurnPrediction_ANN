@@ -1,0 +1,130 @@
+/* Additional custom styles for the Customer Churn Prediction App */
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Enhanced form styling */
+.form-group.focused .form-label {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.form-control:valid {
+    border-color: var(--success-color);
+}
+
+.form-control:invalid {
+    border-color: var(--danger-color);
+}
+
+/* Card hover effects */
+.prediction-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.prediction-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Result animations */
+.result-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.probability-circle {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .display-5 {
+        font-size: 2rem !important;
+    }
+}
+
+/* Loading states */
+.btn-predict:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Enhanced switch styling */
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Tooltip styles */
+.tooltip-custom {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip-custom::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark-color);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.tooltip-custom:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Progress indicator */
+.progress-indicator {
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), #8b5cf6);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.progress-indicator.active {
+    transform: scaleX(1);
+}

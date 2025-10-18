@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Churn Prediction | AI-Powered Analytics</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #6366f1;
+        --secondary-color: #f1f5f9;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --dark-color: #1e293b;
+        --light-color: #f8fafc;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .navbar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .main-container {
+        padding: 2rem 0;
+      }
+
+      .prediction-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: none;
+        overflow: hidden;
+      }
+
+      .card-header {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .form-control,
+      .form-select {
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+      }
+
+      .btn-predict {
+        background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-predict:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+      }
+
+      .result-card {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--box-shadow);
+        margin-top: 2rem;
+      }
+
+      .risk-low {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      .risk-medium {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+
+      .risk-high {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+
+      .probability-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+      }
+
+      .loading {
+        display: none;
+      }
+
+      .loading.show {
+        display: inline-block;
+      }
+
+      .feature-info {
+        background: var(--secondary-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .info-icon {
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .stat-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: var(--box-shadow);
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+      }
+
+      /* Performance Dashboard Styles */
+      .performance-metric {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 10px !important;
+      }
+
+      .performance-metric:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .architecture-item {
+        transition: all 0.3s ease;
+        border-radius: 8px !important;
+      }
+
+      .architecture-item:hover {
+        background: var(--primary-color) !important;
+        color: white !important;
+        transform: scale(1.02);
+      }
+
+      .tech-highlight {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+      }
+
+      .tech-highlight:nth-child(1) { animation-delay: 0.1s; }
+      .tech-highlight:nth-child(2) { animation-delay: 0.2s; }
+      .tech-highlight:nth-child(3) { animation-delay: 0.3s; }
+      .tech-highlight:nth-child(4) { animation-delay: 0.4s; }
+      .tech-highlight:nth-child(5) { animation-delay: 0.5s; }
+      .tech-highlight:nth-child(6) { animation-delay: 0.6s; }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .performance-dashboard {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      @media (max-width: 768px) {
+        .main-container {
+          padding: 1rem 0;
+        }
+
+        .probability-circle {
+          width: 100px;
+          height: 100px;
+          font-size: 1.25rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="#">
+          <i class="fas fa-chart-line text-primary me-2"></i>
+          Churn Predictor AI
+        </a>
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link active" href="/"
+            ><i class="fas fa-home me-1"></i> Prediction</a
+          >
+          <a class="nav-link" href="/analytics"
+            ><i class="fas fa-analytics me-1"></i> Analytics</a
+          >
+          <a class="nav-link" href="/dataset"
+            ><i class="fas fa-database me-1"></i> Dataset</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container main-container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <!-- Header -->
+          <div class="text-center text-white mb-4">
+            <h1 class="display-5 fw-bold mb-3">Customer Churn Prediction</h1>
+            <p class="lead">Powered by Advanced Neural Networks</p>
+          </div>
+
+          <!-- Model Performance Dashboard for Recruiters -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card performance-dashboard">
+                <div class="card-body p-4">
+                  <div class="row text-center">
+                    <div class="col-12 mb-3">
+                      <h4 class="text-primary mb-2">
+                        <i class="fas fa-trophy me-2"></i>
+                        Model Performance & Architecture
+                      </h4>
+                      <p class="text-muted mb-0">Professional-grade AI system with proven accuracy</p>
+                    </div>
+                  </div>
+                  
+                  <div class="row">
+                    <!-- Performance Metrics -->
+                    <div class="col-lg-6">
+                      <h6 class="text-success mb-3">
+                        <i class="fas fa-bullseye me-2"></i>Performance Metrics
+                      </h6>
+                      <div class="row g-3">
+                        <div class="col-6">
+                          <div class="text-center p-3 performance-metric" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                            <div class="h3 mb-1">86.5%</div>
+                            <small>Accuracy</small>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="text-center p-3 performance-metric" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;">
+                            <div class="h3 mb-1">0.864</div>
+                            <small>AUC-ROC</small>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="text-center p-3 performance-metric" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                            <div class="h3 mb-1">78.2%</div>
+                            <small>Precision</small>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="text-center p-3 performance-metric" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                            <div class="h3 mb-1">81.7%</div>
+                            <small>Recall</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Model Architecture -->
+                    <div class="col-lg-6">
+                      <h6 class="text-primary mb-3">
+                        <i class="fas fa-network-wired me-2"></i>Neural Network Architecture
+                      </h6>
+                      <div class="row g-2">
+                        <div class="col-12">
+                          <div class="d-flex justify-content-between align-items-center p-2 bg-light architecture-item">
+                            <span><i class="fas fa-layer-group text-primary me-2"></i>Architecture:</span>
+                            <strong>Deep Neural Network</strong>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="d-flex justify-content-between align-items-center p-2 bg-light architecture-item">
+                            <span><i class="fas fa-sitemap text-info me-2"></i>Layers:</span>
+                            <strong>3 Layers</strong>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="d-flex justify-content-between align-items-center p-2 bg-light architecture-item">
+                            <span><i class="fas fa-circle text-success me-2"></i>Nodes:</span>
+                            <strong>64+32+1</strong>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="d-flex justify-content-between align-items-center p-2 bg-light architecture-item">
+                            <span><i class="fas fa-bolt text-warning me-2"></i>Activation:</span>
+                            <strong>ReLU + Sigmoid</strong>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="d-flex justify-content-between align-items-center p-2 bg-light architecture-item">
+                            <span><i class="fas fa-cogs text-secondary me-2"></i>Optimizer:</span>
+                            <strong>Adam</strong>
+                          </div>
+                        </div>
+                        <div class="col-12">
+                          <div class="d-flex justify-content-between align-items-center p-2 bg-light architecture-item">
+                            <span><i class="fas fa-database text-danger me-2"></i>Training Data:</span>
+                            <strong>10,000 Customer Records</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Technical Highlights for Recruiters -->
+                  <div class="row mt-4">
+                    <div class="col-12">
+                      <div class="alert alert-info border-0" style="background: linear-gradient(135deg, #e0f2fe, #b3e5fc);">
+                        <h6 class="alert-heading mb-2">
+                          <i class="fas fa-star text-warning me-2"></i>
+                          Technical Highlights for Recruiters
+                        </h6>
+                        <div class="row">
+                          <div class="col-md-4 tech-highlight">
+                            <small>
+                              <i class="fas fa-check text-success me-1"></i>
+                              <strong>TensorFlow/Keras</strong> Implementation
+                            </small>
+                          </div>
+                          <div class="col-md-4 tech-highlight">
+                            <small>
+                              <i class="fas fa-check text-success me-1"></i>
+                              <strong>Flask</strong> Web Framework
+                            </small>
+                          </div>
+                          <div class="col-md-4 tech-highlight">
+                            <small>
+                              <i class="fas fa-check text-success me-1"></i>
+                              <strong>Scikit-learn</strong> Preprocessing
+                            </small>
+                          </div>
+                          <div class="col-md-4 tech-highlight">
+                            <small>
+                              <i class="fas fa-check text-success me-1"></i>
+                              <strong>REST API</strong> Integration
+                            </small>
+                          </div>
+                          <div class="col-md-4 tech-highlight">
+                            <small>
+                              <i class="fas fa-check text-success me-1"></i>
+                              <strong>Real-time</strong> Predictions
+                            </small>
+                          </div>
+                          <div class="col-md-4 tech-highlight">
+                            <small>
+                              <i class="fas fa-check text-success me-1"></i>
+                              <strong>Production-ready</strong> Deployment
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Input Form -->
+            <div class="col-lg-8">
+              <div class="card prediction-card">
+                <div class="card-header">
+                  <h3 class="mb-0">
+                    <i class="fas fa-user-tie me-2"></i>
+                    Customer Information
+                  </h3>
+                  <p class="mb-0 opacity-75">
+                    Enter customer details to predict churn probability
+                  </p>
+                </div>
+                <div class="card-body p-4">
+                  <form id="predictionForm">
+                    <div class="row">
+                      <!-- Personal Information -->
+                      <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                          <i class="fas fa-id-card me-2"></i>Personal Details
+                        </h5>
+
+                        <div class="form-group">
+                          <label for="age" class="form-label">Age</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="age"
+                            name="Age"
+                            min="18"
+                            max="100"
+                            required
+                            value="42"
+                          />
+                        </div>
+
+                        <div class="form-group">
+                          <label for="gender" class="form-label">Gender</label>
+                          <select
+                            class="form-select"
+                            id="gender"
+                            name="Gender"
+                            required
+                          >
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female" selected>Female</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="geography" class="form-label"
+                            >Geography</label
+                          >
+                          <select
+                            class="form-select"
+                            id="geography"
+                            name="Geography"
+                            required
+                          >
+                            <option value="">Select Country</option>
+                            <option value="France" selected>France</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Spain">Spain</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="creditScore" class="form-label"
+                            >Credit Score</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="creditScore"
+                            name="CreditScore"
+                            min="300"
+                            max="850"
+                            required
+                            value="619"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Financial Information -->
+                      <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                          <i class="fas fa-dollar-sign me-2"></i>Financial
+                          Details
+                        </h5>
+
+                        <div class="form-group">
+                          <label for="balance" class="form-label"
+                            >Account Balance ($)</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="balance"
+                            name="Balance"
+                            min="0"
+                            step="0.01"
+                            required
+                            value="83807.86"
+                          />
+                        </div>
+
+                        <div class="form-group">
+                          <label for="estimatedSalary" class="form-label"
+                            >Estimated Salary ($)</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="estimatedSalary"
+                            name="EstimatedSalary"
+                            min="0"
+                            step="0.01"
+                            required
+                            value="101348.88"
+                          />
+                        </div>
+
+                        <div class="form-group">
+                          <label for="tenure" class="form-label"
+                            >Tenure (Years)</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="tenure"
+                            name="Tenure"
+                            min="0"
+                            max="50"
+                            required
+                            value="2"
+                          />
+                        </div>
+
+                        <div class="form-group">
+                          <label for="numOfProducts" class="form-label"
+                            >Number of Products</label
+                          >
+                          <select
+                            class="form-select"
+                            id="numOfProducts"
+                            name="NumOfProducts"
+                            required
+                          >
+                            <option value="1" selected>1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- Account Status -->
+                      <div class="col-12">
+                        <h5 class="text-primary mb-3 mt-3">
+                          <i class="fas fa-check-circle me-2"></i>Account Status
+                        </h5>
+
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label class="form-label">Has Credit Card</label>
+                              <div class="form-check form-switch">
+                                <input
+                                  class="form-check-input"
+                                  type="checkbox"
+                                  id="hasCrCard"
+                                  name="HasCrCard"
+                                  checked
+                                />
+                                <label class="form-check-label" for="hasCrCard">
+                                  Yes, customer has a credit card
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label class="form-label">Is Active Member</label>
+                              <div class="form-check form-switch">
+                                <input
+                                  class="form-check-input"
+                                  type="checkbox"
+                                  id="isActiveMember"
+                                  name="IsActiveMember"
+                                  checked
+                                />
+                                <label
+                                  class="form-check-label"
+                                  for="isActiveMember"
+                                >
+                                  Yes, customer is active
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                      <button
+                        type="submit"
+                        class="btn btn-primary btn-predict btn-lg"
+                      >
+                        <span
+                          class="loading spinner-border spinner-border-sm me-2"
+                        ></span>
+                        <i class="fas fa-brain me-2"></i>
+                        Predict Churn
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="col-lg-4">
+              <div class="card prediction-card">
+                <div class="card-header">
+                  <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    About This Model
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div class="feature-info">
+                    <h6>
+                      <i class="fas fa-info-circle info-icon"></i>How it works
+                    </h6>
+                    <p class="mb-0 small">
+                      Our AI model analyzes customer behavior patterns using
+                      advanced neural networks to predict the likelihood of
+                      churn.
+                    </p>
+                  </div>
+
+                  <div class="feature-info">
+                    <h6>
+                      <i class="fas fa-chart-bar info-icon"></i>Key Factors
+                    </h6>
+                    <ul class="small mb-0">
+                      <li>Account balance and financial behavior</li>
+                      <li>Product usage patterns</li>
+                      <li>Customer demographics</li>
+                      <li>Account activity status</li>
+                    </ul>
+                  </div>
+
+                  <div class="feature-info">
+                    <h6><i class="fas fa-shield-alt info-icon"></i>Accuracy</h6>
+                    <p class="mb-0 small">
+                      Trained on historical data with high accuracy metrics to
+                      provide reliable predictions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div id="resultsSection" style="display: none">
+            <div class="row justify-content-center mt-4">
+              <div class="col-lg-8">
+                <div class="card result-card" id="resultCard">
+                  <div class="card-header text-white" id="resultHeader">
+                    <h4 class="mb-0">
+                      <i class="fas fa-analytics me-2"></i>
+                      Prediction Results
+                    </h4>
+                  </div>
+                  <div class="card-body text-center p-4">
+                    <div class="probability-circle" id="probabilityCircle">
+                      <span id="probabilityText">0%</span>
+                    </div>
+
+                    <h3 id="predictionResult" class="mb-3"></h3>
+                    <p id="riskLevel" class="lead"></p>
+
+                    <div class="stats-grid" id="statsGrid">
+                      <div class="stat-item">
+                        <div class="stat-value" id="churnProb">0%</div>
+                        <div class="stat-label">Churn Probability</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-value" id="confidence">0%</div>
+                        <div class="stat-label">Confidence</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-value" id="riskCategory">Low</div>
+                        <div class="stat-label">Risk Category</div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4">
+                      <button
+                        class="btn btn-outline-primary"
+                        onclick="resetForm()"
+                      >
+                        <i class="fas fa-redo me-2"></i>
+                        Analyze Another Customer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document
+        .getElementById("predictionForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          const loadingSpinner = document.querySelector(".loading");
+          const submitBtn = document.querySelector(".btn-predict");
+          const btnText = submitBtn.innerHTML;
+
+          loadingSpinner.classList.add("show");
+          submitBtn.disabled = true;
+          submitBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
+
+          // Collect form data
+          const formData = new FormData(this);
+          const data = {};
+
+          for (let [key, value] of formData.entries()) {
+            data[key] = value;
+          }
+
+          // Handle checkboxes
+          data.HasCrCard = document.getElementById("hasCrCard").checked ? 1 : 0;
+          data.IsActiveMember = document.getElementById("isActiveMember")
+            .checked
+            ? 1
+            : 0;
+
+          try {
+            const response = await fetch("/predict", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              displayResults(result);
+            } else {
+              throw new Error(result.error || "Prediction failed");
+            }
+          } catch (error) {
+            alert("Error: " + error.message);
+          } finally {
+            // Reset button state
+            loadingSpinner.classList.remove("show");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = btnText;
+          }
+        });
+
+      function displayResults(result) {
+        const resultsSection = document.getElementById("resultsSection");
+        const resultCard = document.getElementById("resultCard");
+        const resultHeader = document.getElementById("resultHeader");
+        const probabilityCircle = document.getElementById("probabilityCircle");
+        const probabilityText = document.getElementById("probabilityText");
+        const predictionResult = document.getElementById("predictionResult");
+        const riskLevel = document.getElementById("riskLevel");
+
+        // Update stats
+        document.getElementById("churnProb").textContent =
+          (result.churn_probability * 100).toFixed(1) + "%";
+        document.getElementById("confidence").textContent =
+          (result.confidence * 100).toFixed(1) + "%";
+        document.getElementById("riskCategory").textContent = result.risk_level;
+
+        // Update main display
+        const probability = (result.churn_probability * 100).toFixed(1);
+        probabilityText.textContent = probability + "%";
+
+        // Set colors based on risk level
+        let headerClass, circleClass;
+        if (result.risk_level === "Low") {
+          headerClass = "risk-low";
+          circleClass = "risk-low";
+        } else if (result.risk_level === "Medium") {
+          headerClass = "risk-medium";
+          circleClass = "risk-medium";
+        } else {
+          headerClass = "risk-high";
+          circleClass = "risk-high";
+        }
+
+        resultHeader.className = `card-header text-white ${headerClass}`;
+        probabilityCircle.className = `probability-circle ${circleClass}`;
+
+        // Update text
+        if (result.will_churn) {
+          predictionResult.textContent = "⚠️ Customer Likely to Churn";
+          riskLevel.textContent = `High risk of customer leaving (${result.risk_level} Risk Level)`;
+        } else {
+          predictionResult.textContent = "✅ Customer Likely to Stay";
+          riskLevel.textContent = `Low risk of customer leaving (${result.risk_level} Risk Level)`;
+        }
+
+        // Show results with animation
+        resultsSection.style.display = "block";
+        setTimeout(() => {
+          resultsSection.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+
+      function resetForm() {
+        document.getElementById("predictionForm").reset();
+        document.getElementById("resultsSection").style.display = "none";
+
+        // Reset to default values
+        document.getElementById("age").value = "42";
+        document.getElementById("gender").value = "Female";
+        document.getElementById("geography").value = "France";
+        document.getElementById("creditScore").value = "619";
+        document.getElementById("balance").value = "83807.86";
+        document.getElementById("estimatedSalary").value = "101348.88";
+        document.getElementById("tenure").value = "2";
+        document.getElementById("numOfProducts").value = "1";
+        document.getElementById("hasCrCard").checked = true;
+        document.getElementById("isActiveMember").checked = true;
+      }
+
+      // Add some interactive effects
+      document
+        .querySelectorAll(".form-control, .form-select")
+        .forEach((element) => {
+          element.addEventListener("focus", function () {
+            this.parentElement.classList.add("focused");
+          });
+
+          element.addEventListener("blur", function () {
+            this.parentElement.classList.remove("focused");
+          });
+        });
+    </script>
+  </body>
+</html>

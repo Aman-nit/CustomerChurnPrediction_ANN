@@ -1,0 +1,10 @@
+tensorflow == 2.12.0
+pandas
+numpy 
+scikit-learn
+matplotlib
+seaborn
+tensorboard
+flask
+flask-cors
+gunicorn
